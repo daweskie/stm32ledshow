@@ -1,0 +1,419 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.eabi_attribute 27, 3
+   4              		.fpu fpv4-sp-d16
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 6
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.thumb
+  15              		.file	"main.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.bss.SDU1,"aw",%nobits
+  20              		.align	2
+  23              	SDU1:
+  24 0000 00000000 		.space	600
+  24      00000000 
+  24      00000000 
+  24      00000000 
+  24      00000000 
+  25              		.section	.rodata
+  26              		.align	2
+  27              	.LC0:
+  28 0000 6D656D00 		.ascii	"mem\000"
+  29              		.align	2
+  30              	.LC1:
+  31 0004 74687265 		.ascii	"threads\000"
+  31      61647300 
+  32              		.align	2
+  33              	.LC2:
+  34 000c 746F6767 		.ascii	"toggle\000"
+  34      6C6500
+  35 0013 00       		.align	2
+  36              	.LC3:
+  37 0014 7400     		.ascii	"t\000"
+  38 0016 0000     		.align	2
+  39              	.LC4:
+  40 0018 626C696E 		.ascii	"blinkspeed\000"
+  40      6B737065 
+  40      656400
+  41 0023 00       		.align	2
+  42              	.LC5:
+  43 0024 627300   		.ascii	"bs\000"
+  44              		.section	.rodata.commands,"a",%progbits
+  45              		.align	2
+  48              	commands:
+  49 0000 00000000 		.word	.LC0
+  50 0004 00000000 		.word	cmd_mem
+  51 0008 04000000 		.word	.LC1
+  52 000c 00000000 		.word	cmd_threads
+  53 0010 0C000000 		.word	.LC2
+  54 0014 00000000 		.word	cmd_toggle
+  55 0018 14000000 		.word	.LC3
+  56 001c 00000000 		.word	cmd_toggle
+  57 0020 18000000 		.word	.LC4
+  58 0024 00000000 		.word	cmd_blinkspeed
+  59 0028 24000000 		.word	.LC5
+  60 002c 00000000 		.word	cmd_blinkspeed
+  61 0030 00000000 		.word	0
+  62 0034 00000000 		.word	0
+  63              		.section	.rodata.shell_cfg1,"a",%progbits
+  64              		.align	2
+  67              	shell_cfg1:
+  68 0000 00000000 		.word	SDU1
+  69 0004 00000000 		.word	commands
+  70              		.global	msg
+  71              		.section	.data.msg,"aw",%progbits
+  72              		.align	2
+  75              	msg:
+  76 0000 4E6F7720 		.ascii	"Now is the time for all good men to come to the aid"
+  76      69732074 
+  76      68652074 
+  76      696D6520 
+  76      666F7220 
+  77 0033 206F6620 		.ascii	" of their country\000"
+  77      74686569 
+  77      7220636F 
+  77      756E7472 
+  77      7900
+  78 0045 000000   		.section	.rodata
+  79 0027 00       		.align	2
+  80              	.LC6:
+  81 0028 76616C75 		.ascii	"value of i : %d \015\012\000"
+  81      65206F66 
+  81      2069203A 
+  81      20256420 
+  81      0D0A00
+  82 003b 00       		.section	.text.main,"ax",%progbits
+  83              		.align	2
+  84              		.p2align 4,,15
+  85              		.global	main
+  86              		.thumb
+  87              		.thumb_func
+  89              	main:
+  90              	.LFB118:
+  91              		.file 1 "main.c"
+   1:main.c        **** /*
+   2:main.c        **** 		ChibiOS/RT - Copyright (C) 2006,2007,2008,2009,2010,
+   3:main.c        **** 								 2011,2012 Giovanni Di Sirio.
+   4:main.c        **** 
+   5:main.c        **** 		This file is part of ChibiOS/RT.
+   6:main.c        **** 
+   7:main.c        **** 		ChibiOS/RT is free software; you can redistribute it and/or modify
+   8:main.c        **** 		it under the terms of the GNU General Public License as published by
+   9:main.c        **** 		the Free Software Foundation; either version 3 of the License, or
+  10:main.c        **** 		(at your option) any later version.
+  11:main.c        **** 
+  12:main.c        **** 		ChibiOS/RT is distributed in the hope that it will be useful,
+  13:main.c        **** 		but WITHOUT ANY WARRANTY; without even the implied warranty of
+  14:main.c        **** 		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+  15:main.c        **** 		GNU General Public License for more details.
+  16:main.c        **** 
+  17:main.c        **** 		You should have received a copy of the GNU General Public License
+  18:main.c        **** 		along with this program.	If not, see <http://www.gnu.org/licenses/>.
+  19:main.c        ****  */
+  20:main.c        **** 
+  21:main.c        **** #include <stdio.h>
+  22:main.c        **** #include <string.h>
+  23:main.c        **** #include <stdlib.h>
+  24:main.c        **** 
+  25:main.c        **** #include "ch.h"
+  26:main.c        **** #include "hal.h"
+  27:main.c        **** 
+  28:main.c        **** #include "shell.h"
+  29:main.c        **** #include "myMisc.h"
+  30:main.c        **** 
+  31:main.c        **** #include "chprintf.h"
+  32:main.c        **** 
+  33:main.c        **** #include "usbcfg.h"
+  34:main.c        **** 
+  35:main.c        **** 
+  36:main.c        **** 
+  37:main.c        **** 
+  38:main.c        **** 
+  39:main.c        **** /* Virtual serial port over USB.*/
+  40:main.c        **** static SerialUSBDriver SDU1;
+  41:main.c        **** 
+  42:main.c        **** /*
+  43:main.c        ****  * assert Shell Commands to functions
+  44:main.c        ****  */
+  45:main.c        **** 
+  46:main.c        **** static const ShellCommand commands[] =
+  47:main.c        **** {
+  48:main.c        **** 
+  49:main.c        ****     {"mem", cmd_mem},
+  50:main.c        ****     {"threads", cmd_threads},
+  51:main.c        ****     {"toggle", cmd_toggle},
+  52:main.c        ****     {"t", cmd_toggle},
+  53:main.c        ****     {"blinkspeed", cmd_blinkspeed},
+  54:main.c        ****     {"bs", cmd_blinkspeed},
+  55:main.c        ****     {NULL, NULL}
+  56:main.c        **** };
+  57:main.c        **** 
+  58:main.c        **** /*
+  59:main.c        ****  * Shell configuration
+  60:main.c        ****  */
+  61:main.c        **** 
+  62:main.c        **** #define SHELL_WA_SIZE	 THD_WA_SIZE(2048)
+  63:main.c        **** 
+  64:main.c        **** static const ShellConfig shell_cfg1 =
+  65:main.c        **** {
+  66:main.c        ****     (BaseSequentialStream *)&SDU1,
+  67:main.c        ****     commands
+  68:main.c        **** };
+  69:main.c        **** 
+  70:main.c        **** 
+  71:main.c        **** char msg[] = "Now is the time for all good men to come to the aid of their country";
+  72:main.c        **** 
+  73:main.c        **** /*
+  74:main.c        ****  * Application entry point.
+  75:main.c        ****  */
+  76:main.c        **** int main(void)
+  77:main.c        **** {
+  92              		.loc 1 77 0
+  93              		.cfi_startproc
+  94              		@ args = 0, pretend = 0, frame = 8
+  95              		@ frame_needed = 0, uses_anonymous_args = 0
+  96 0000 00B5     		push	{lr}
+  97              		.cfi_def_cfa_offset 4
+  98              		.cfi_offset 14, -4
+  99 0002 83B0     		sub	sp, sp, #12
+ 100              		.cfi_def_cfa_offset 16
+  78:main.c        **** 
+  79:main.c        **** 
+  80:main.c        **** 
+  81:main.c        ****      /* Shell thread
+  82:main.c        ****      */
+  83:main.c        ****     Thread *shelltp = NULL;
+ 101              		.loc 1 83 0
+ 102 0004 0023     		movs	r3, #0
+ 103 0006 0093     		str	r3, [sp]
+  84:main.c        **** 
+  85:main.c        ****     /*
+  86:main.c        ****      * System initializations.
+  87:main.c        ****      * - HAL initialization, this also initializes the configured device drivers
+  88:main.c        ****      *	 and performs the board-specific initializations.
+  89:main.c        ****      * - Kernel initialization, the main() function becomes a thread and the
+  90:main.c        ****      *	 RTOS is active.
+  91:main.c        ****      */
+  92:main.c        ****     halInit();
+ 104              		.loc 1 92 0
+ 105 0008 FFF7FEFF 		bl	halInit
+  93:main.c        ****     chSysInit();
+ 106              		.loc 1 93 0
+ 107 000c FFF7FEFF 		bl	chSysInit
+  94:main.c        **** 
+  95:main.c        ****     /*
+  96:main.c        ****      * Initializes a serial-over-USB CDC driver.
+  97:main.c        ****      */
+  98:main.c        ****     sduObjectInit(&SDU1);
+ 108              		.loc 1 98 0
+ 109 0010 2648     		ldr	r0, .L7
+ 110 0012 FFF7FEFF 		bl	sduObjectInit
+  99:main.c        ****     sduStart(&SDU1, &serusbcfg);
+ 111              		.loc 1 99 0
+ 112 0016 2548     		ldr	r0, .L7
+ 113 0018 2549     		ldr	r1, .L7+4
+ 114 001a FFF7FEFF 		bl	sduStart
+ 100:main.c        **** 
+ 101:main.c        ****     /*
+ 102:main.c        ****      * Activates the USB driver and then the USB bus pull-up on D+.
+ 103:main.c        ****      * Note, a delay is inserted in order to not have to disconnect the cable
+ 104:main.c        ****      * after a reset.
+ 105:main.c        ****      */
+ 106:main.c        ****     usbDisconnectBus(serusbcfg.usbp);
+ 115              		.loc 1 106 0
+ 116 001e 244B     		ldr	r3, .L7+4
+ 117 0020 1B68     		ldr	r3, [r3]
+ 118 0022 DB6B     		ldr	r3, [r3, #60]
+ 119 0024 224A     		ldr	r2, .L7+4
+ 120 0026 1268     		ldr	r2, [r2]
+ 121 0028 D26B     		ldr	r2, [r2, #60]
+ 122 002a 926B     		ldr	r2, [r2, #56]
+ 123 002c 22F40022 		bic	r2, r2, #524288
+ 124 0030 9A63     		str	r2, [r3, #56]
+ 107:main.c        ****     chThdSleepMilliseconds(2000);
+ 125              		.loc 1 107 0
+ 126 0032 44F61760 		movw	r0, #19991
+ 127 0036 FFF7FEFF 		bl	chThdSleep
+ 108:main.c        ****     usbStart(serusbcfg.usbp, &usbcfg);
+ 128              		.loc 1 108 0
+ 129 003a 1D4B     		ldr	r3, .L7+4
+ 130 003c 1B68     		ldr	r3, [r3]
+ 131 003e 1846     		mov	r0, r3
+ 132 0040 1C49     		ldr	r1, .L7+8
+ 133 0042 FFF7FEFF 		bl	usbStart
+ 109:main.c        ****     usbConnectBus(serusbcfg.usbp);
+ 134              		.loc 1 109 0
+ 135 0046 1A4B     		ldr	r3, .L7+4
+ 136 0048 1B68     		ldr	r3, [r3]
+ 137 004a DB6B     		ldr	r3, [r3, #60]
+ 138 004c 184A     		ldr	r2, .L7+4
+ 139 004e 1268     		ldr	r2, [r2]
+ 140 0050 D26B     		ldr	r2, [r2, #60]
+ 141 0052 926B     		ldr	r2, [r2, #56]
+ 142 0054 42F40022 		orr	r2, r2, #524288
+ 143 0058 9A63     		str	r2, [r3, #56]
+ 110:main.c        **** 
+ 111:main.c        ****     /*
+ 112:main.c        ****      * Activate custom stuff
+ 113:main.c        ****      */
+ 114:main.c        **** 
+ 115:main.c        **** 
+ 116:main.c        **** 
+ 117:main.c        ****     startBlinker();
+ 144              		.loc 1 117 0
+ 145 005a FFF7FEFF 		bl	startBlinker
+ 146              	.L6:
+ 147              	.LBB2:
+ 118:main.c        ****     //chThdSleepMilliseconds(500);
+ 119:main.c        **** 
+ 120:main.c        **** 
+ 121:main.c        **** 
+ 122:main.c        ****     /*
+ 123:main.c        ****      * Main loop, does nothing except
+ 124:main.c        ****      */
+ 125:main.c        **** 
+ 126:main.c        **** 
+ 127:main.c        **** 
+ 128:main.c        ****     while (TRUE)
+ 129:main.c        ****     {
+ 130:main.c        ****         int i = 0;
+ 148              		.loc 1 130 0
+ 149 005e 0023     		movs	r3, #0
+ 150 0060 0193     		str	r3, [sp, #4]
+ 131:main.c        ****         while (palReadPad(GPIOA, GPIOA_BUTTON))  {
+ 151              		.loc 1 131 0
+ 152 0062 1CE0     		b	.L2
+ 153              	.L5:
+ 132:main.c        ****                 if ((i>30) && (i < 3000))
+ 154              		.loc 1 132 0
+ 155 0064 019B     		ldr	r3, [sp, #4]
+ 156 0066 1E2B     		cmp	r3, #30
+ 157 0068 07DD     		ble	.L3
+ 158              		.loc 1 132 0 is_stmt 0 discriminator 1
+ 159 006a 019A     		ldr	r2, [sp, #4]
+ 160 006c 40F6B733 		movw	r3, #2999
+ 161 0070 9A42     		cmp	r2, r3
+ 162 0072 02DC     		bgt	.L3
+ 133:main.c        ****                 {
+ 134:main.c        ****                     changeWay();
+ 163              		.loc 1 134 0 is_stmt 1
+ 164 0074 FFF7FEFF 		bl	changeWay
+ 165 0078 06E0     		b	.L4
+ 166              	.L3:
+ 135:main.c        ****                 }
+ 136:main.c        ****                 else if ( i > 3001)
+ 167              		.loc 1 136 0
+ 168 007a 019A     		ldr	r2, [sp, #4]
+ 169 007c 40F6B933 		movw	r3, #3001
+ 170 0080 9A42     		cmp	r2, r3
+ 171 0082 01DD     		ble	.L4
+ 137:main.c        ****                 {
+ 138:main.c        ****                     bsset();
+ 172              		.loc 1 138 0
+ 173 0084 FFF7FEFF 		bl	bsset
+ 174              	.L4:
+ 139:main.c        ****                 }
+ 140:main.c        ****                 chThdSleepMilliseconds(1);
+ 175              		.loc 1 140 0
+ 176 0088 0120     		movs	r0, #1
+ 177 008a FFF7FEFF 		bl	chThdSleep
+ 141:main.c        ****                 i++;
+ 178              		.loc 1 141 0
+ 179 008e 019B     		ldr	r3, [sp, #4]
+ 180 0090 0133     		adds	r3, r3, #1
+ 181 0092 0193     		str	r3, [sp, #4]
+ 142:main.c        **** 
+ 143:main.c        ****                 chprintf((BaseSequentialStream*)&SDU1, "value of i : %d \r\n", i);
+ 182              		.loc 1 143 0
+ 183 0094 0548     		ldr	r0, .L7
+ 184 0096 0849     		ldr	r1, .L7+12
+ 185 0098 019A     		ldr	r2, [sp, #4]
+ 186 009a FFF7FEFF 		bl	chprintf
+ 187              	.L2:
+ 131:main.c        ****                 if ((i>30) && (i < 3000))
+ 188              		.loc 1 131 0 discriminator 1
+ 189 009e 074B     		ldr	r3, .L7+16
+ 190 00a0 1B69     		ldr	r3, [r3, #16]
+ 191 00a2 03F00103 		and	r3, r3, #1
+ 192 00a6 002B     		cmp	r3, #0
+ 193 00a8 DCD1     		bne	.L5
+ 194              	.LBE2:
+ 144:main.c        **** 
+ 145:main.c        ****         }
+ 146:main.c        ****         //chThdSleepMilliseconds(1);
+ 147:main.c        ****     }
+ 195              		.loc 1 147 0
+ 196 00aa D8E7     		b	.L6
+ 197              	.L8:
+ 198              		.align	2
+ 199              	.L7:
+ 200 00ac 00000000 		.word	SDU1
+ 201 00b0 00000000 		.word	serusbcfg
+ 202 00b4 00000000 		.word	usbcfg
+ 203 00b8 28000000 		.word	.LC6
+ 204 00bc 00000240 		.word	1073872896
+ 205              		.cfi_endproc
+ 206              	.LFE118:
+ 208              		.text
+ 209              	.Letext0:
+ 210              		.file 2 "/usr/include/newlib/machine/_default_types.h"
+ 211              		.file 3 "/usr/lib/gcc/arm-none-eabi/4.8/include/stddef.h"
+ 212              		.file 4 "/usr/include/newlib/stdint.h"
+ 213              		.file 5 "/usr/src/chibiostest/os/ports/GCC/ARMCMx/chtypes.h"
+ 214              		.file 6 "/usr/src/chibiostest/os/kernel/include/chlists.h"
+ 215              		.file 7 "/usr/src/chibiostest/os/kernel/include/chthreads.h"
+ 216              		.file 8 "/usr/src/chibiostest/os/ports/GCC/ARMCMx/chcore_v7m.h"
+ 217              		.file 9 "/usr/src/chibiostest/os/kernel/include/chmtx.h"
+ 218              		.file 10 "/usr/src/chibiostest/os/kernel/include/chevents.h"
+ 219              		.file 11 "/usr/src/chibiostest/os/kernel/include/chqueues.h"
+ 220              		.file 12 "/usr/src/chibiostest/os/kernel/include/chstreams.h"
+ 221              		.file 13 "/usr/src/chibiostest/os/hal/platforms/STM32/GPIOv2/pal_lld.h"
+ 222              		.file 14 "/usr/src/chibiostest/os/hal/include/usb.h"
+ 223              		.file 15 "/usr/src/chibiostest/os/hal/platforms/STM32/OTGv1/usb_lld.h"
+ 224              		.file 16 "/usr/src/chibiostest/os/hal/platforms/STM32/OTGv1/stm32_otg.h"
+ 225              		.file 17 "/usr/src/chibiostest/os/hal/include/serial_usb.h"
+ 226              		.file 18 "/usr/src/chibiostest/os/various/shell.h"
+ 227              		.file 19 "/usr/src/chibiostest/os/ports/common/ARMCMx/CMSIS/include/core_cm4.h"
+ 228              		.file 20 "usbcfg.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 main.c
+     /tmp/ccu3tVjY.s:20     .bss.SDU1:0000000000000000 $d
+     /tmp/ccu3tVjY.s:23     .bss.SDU1:0000000000000000 SDU1
+     /tmp/ccu3tVjY.s:26     .rodata:0000000000000000 $d
+     /tmp/ccu3tVjY.s:45     .rodata.commands:0000000000000000 $d
+     /tmp/ccu3tVjY.s:48     .rodata.commands:0000000000000000 commands
+     /tmp/ccu3tVjY.s:64     .rodata.shell_cfg1:0000000000000000 $d
+     /tmp/ccu3tVjY.s:67     .rodata.shell_cfg1:0000000000000000 shell_cfg1
+     /tmp/ccu3tVjY.s:75     .data.msg:0000000000000000 msg
+     /tmp/ccu3tVjY.s:72     .data.msg:0000000000000000 $d
+     /tmp/ccu3tVjY.s:83     .text.main:0000000000000000 $t
+     /tmp/ccu3tVjY.s:89     .text.main:0000000000000000 main
+     /tmp/ccu3tVjY.s:200    .text.main:00000000000000ac $d
+                     .debug_frame:0000000000000010 $d
+
+UNDEFINED SYMBOLS
+cmd_mem
+cmd_threads
+cmd_toggle
+cmd_blinkspeed
+halInit
+chSysInit
+sduObjectInit
+sduStart
+chThdSleep
+usbStart
+startBlinker
+changeWay
+bsset
+chprintf
+serusbcfg
+usbcfg
